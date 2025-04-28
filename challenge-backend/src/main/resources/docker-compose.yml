@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  api:
+    image: backend-challenger:latest  # Nombre de la imagen que construiste (si usas Docker Hub, pon tu usuario/mi-api)
+    build:
+      context: .  # Construye la imagen desde el Dockerfile local
+      dockerfile: Dockerfile  # Asegúrate de tener un archivo Dockerfile en tu proyecto
+    ports:
+      - "8080:8080"  # Expon el puerto 8080 para acceder a la API
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/calculadora  # URL de conexión con la base de datos
+      SPRING_DATASOURCE_USERNAME: challenger  # Usuario para PostgreSQL
+      SPRING_DATASOURCE_PASSWORD: prueba  # Contraseña para PostgreSQL
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update  # Hibernate actualizará el esquema de la base de datos
+    depends_on:
+      - db:
+         condition: service_healthy
+    restart: on-failure     
+
+  db:
+    image: postgres:latest  # Usamos la imagen oficial de PostgreSQL
+    environment:
+      POSTGRES_USER: challenger  # Usuario de la base de datos
+      POSTGRES_PASSWORD: prueba  # Contraseña de la base de datos
+      POSTGRES_DB: calculadora  # Nombre de la base de datos que se creará
+    ports:
+      - "5432:5432"  # Exponemos el puerto 5432 para acceder a PostgreSQL
+    volumes:
+      - db-data:/var/lib/postgresql/data  # Persistimos los datos de PostgreSQL en un volumen
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U challenger"]
+      interval: 5s
+      timeout: 5s
+      retries: 5  
+
+volumes:
+  db-data:  # Definimos un volumen para persistir los datos de PostgreSQL
