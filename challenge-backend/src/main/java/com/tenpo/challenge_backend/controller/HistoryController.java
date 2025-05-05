@@ -1,12 +1,13 @@
 package com.tenpo.challenge_backend.controller;
 
-import com.tenpo.challenge_backend.model.CallHistory;
+import com.tenpo.challenge_backend.dto.CallHistoryDto;
 import com.tenpo.challenge_backend.service.HistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -28,7 +29,9 @@ public class HistoryController {
             }
     )
     @GetMapping
-    public Flux<CallHistory> getAllHistory(Pageable pageable) {
+    public Flux<CallHistoryDto> getAllHistory(@RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
         return historyService.getHistory(pageable);
     }
 }
